@@ -1,0 +1,24 @@
+# Variables de entorno sensibles - PROYECTO COMPLETO
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+
+# Datos de Docker
+mongo_data/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Certificados y claves globales
+*.pem
+*.key
+*.crt
+
+# Logs del proyecto
+*.log
+logs/
