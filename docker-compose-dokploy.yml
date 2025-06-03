@@ -67,10 +67,6 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.routers.backend.priority=100"
       - "traefik.http.services.backend.loadbalancer.server.port=${PORT}"
-      
-      # Health check
-      - "traefik.http.services.backend.loadbalancer.healthcheck.path=/api/health"
-      - "traefik.http.services.backend.loadbalancer.healthcheck.interval=30s"
 
   # Frontend React
   frontend:
