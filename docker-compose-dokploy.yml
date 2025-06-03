@@ -43,7 +43,7 @@ services:
       dockerfile: Dockerfile
     container_name: joinup-backend
     ports:
-      - "${PORT}:3000"
+      - "${PORT}:${PORT}"
     
     restart: unless-stopped
     environment:
