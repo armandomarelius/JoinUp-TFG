@@ -5,6 +5,8 @@ services:
   mongo:
     image: mongo:8.0
     container_name: joinup-mongo
+    ports:
+      - "27017:27017"
     restart: unless-stopped
     volumes:
       - mongo_data:/data/db
@@ -18,6 +20,8 @@ services:
   mongo-express:
     image: mongo-express:1.0
     container_name: joinup-mongo-express
+    ports:
+      - "8081:8081"
     restart: unless-stopped
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME}
@@ -31,13 +35,6 @@ services:
       - mongo
     networks:
       - dokploy-network
-    labels:
-      # Traefik labels para Mongo Express en subdominio con HTTPS
-      - "traefik.enable=true"
-      - "traefik.http.routers.mongo-express.rule=Host(`mongo.${MAIN_DOMAIN}`)"
-      - "traefik.http.routers.mongo-express.entrypoints=websecure"
-      - "traefik.http.routers.mongo-express.tls.certresolver=letsencrypt"
-      - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
 
   # Backend API
   backend:
@@ -45,6 +42,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: joinup-backend
+    ports:
+      - "3000:3000"
+    
     restart: unless-stopped
     environment:
       PORT: ${PORT}
@@ -59,14 +59,7 @@ services:
       - mongo
     networks:
       - dokploy-network
-    labels:
-      # Traefik labels para Backend API con HTTPS
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`${MAIN_DOMAIN}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.backend.priority=100"
-      - "traefik.http.services.backend.loadbalancer.server.port=${PORT}"
+
 
   # Frontend React
   frontend:
@@ -83,14 +76,6 @@ services:
       - backend
     networks:
       - dokploy-network
-    labels:
-      # Traefik labels para Frontend con HTTPS
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`${MAIN_DOMAIN}`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.frontend.priority=1"
-      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
       
 volumes:
   mongo_data:
