@@ -13,7 +13,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     networks:
       - dokploy-network
-    # No exponemos puerto públicamente, solo interno
 
   # Mongo Express - Administrador web de MongoDB
   mongo-express:
@@ -36,8 +35,7 @@ services:
       # Traefik labels para Mongo Express en subdominio
       - "traefik.enable=true"
       - "traefik.http.routers.mongo-express.rule=Host(`mongo.${MAIN_DOMAIN}`)"
-      - "traefik.http.routers.mongo-express.entrypoints=websecure"
-      - "traefik.http.routers.mongo-express.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.mongo-express.entrypoints=web"
       - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
 
   # Backend API
@@ -48,11 +46,11 @@ services:
     container_name: joinup-backend
     restart: unless-stopped
     environment:
-      PORT: 3000
-      NODE_ENV: production
-      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/joinup?authSource=admin
+      PORT: ${PORT}
+      NODE_ENV: development  # Cambiado a development para CORS permisivo
+      MONGODB_URI: ${MONGODB_URI}
       JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: https://${MAIN_DOMAIN}
+      FRONTEND_URL: ${FRONTEND_URL}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
@@ -64,16 +62,13 @@ services:
       # Traefik labels para Backend API
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`${MAIN_DOMAIN}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backend.entrypoints=web"
       - "traefik.http.routers.backend.priority=100"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      # CORS headers
-      - "traefik.http.middlewares.backend-cors.headers.accessControlAllowOriginList=https://${MAIN_DOMAIN}"
-      - "traefik.http.middlewares.backend-cors.headers.accessControlAllowMethods=GET,POST,PUT,DELETE,OPTIONS"
-      - "traefik.http.middlewares.backend-cors.headers.accessControlAllowHeaders=Content-Type,Authorization,Cookie"
-      - "traefik.http.middlewares.backend-cors.headers.accessControlAllowCredentials=true"
-      - "traefik.http.routers.backend.middlewares=backend-cors"
+      - "traefik.http.services.backend.loadbalancer.server.port=${PORT}"
+      
+      # Health check
+      - "traefik.http.services.backend.loadbalancer.healthcheck.path=/api/health"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.interval=30s"
 
   # Frontend React
   frontend:
@@ -83,7 +78,7 @@ services:
     container_name: joinup-frontend
     restart: unless-stopped
     environment:
-      VITE_BACKEND_URL: https://${MAIN_DOMAIN}
+      VITE_BACKEND_URL: http://${MAIN_DOMAIN}
     depends_on:
       - backend
     networks:
@@ -92,8 +87,7 @@ services:
       # Traefik labels para Frontend
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`${MAIN_DOMAIN}`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.routers.frontend.priority=1"
       - "traefik.http.services.frontend.loadbalancer.server.port=5173"
       
