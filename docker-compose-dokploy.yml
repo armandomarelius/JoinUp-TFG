@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  # Base de datos MongoDB
+  mongo:
+    image: mongo:8.0
+    container_name: joinup-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    networks:
+      - dokploy-network
+    # No exponemos puerto públicamente, solo interno
+
+  # Mongo Express - Administrador web de MongoDB
+  mongo-express:
+    image: mongo-express:1.0
+    container_name: joinup-mongo-express
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
+      ME_CONFIG_SITE_BASEURL: /
+    depends_on:
+      - mongo
+    networks:
+      - dokploy-network
+
+  # Backend API
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: joinup-backend
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/joinup?authSource=admin
+      JWT_SECRET: ${JWT_SECRET}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    depends_on:
+      - mongo
+    networks:
+      - dokploy-network
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: joinup-frontend
+    restart: unless-stopped
+    environment:
+      VITE_BACKEND_URL: http://192.168.1.155:3000
+    depends_on:
+      - backend
+    networks:
+      - dokploy-network
+      
+volumes:
+  mongo_data:
+
+networks:
+  dokploy-network:
+    external: true
