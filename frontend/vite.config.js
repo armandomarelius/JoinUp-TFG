@@ -15,6 +15,7 @@ export default defineConfig({
     },
     allowedHosts: [
       'localhost',
+      '192.168.1.155',
       '127.0.0.1',
       '0.0.0.0',
       'joinup-project-joinupcompose-ncv5ku-dacd89-192-168-1-155.traefik.me',
