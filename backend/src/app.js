@@ -21,6 +21,7 @@ const allowedOrigins = [
   'https://192.168.1.155:5173',
   'http://192.168.1.155:3069',
   'https://192.168.1.155:3069',
+  `https://api.${process.env.MAIN_DOMAIN}`,
 
   // Dominio con HTTPS
   `https://${process.env.MAIN_DOMAIN}`,

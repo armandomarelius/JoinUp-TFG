@@ -71,7 +71,7 @@ services:
       - "5173:5173"
     restart: unless-stopped
     environment:
-      VITE_BACKEND_URL: https://${MAIN_DOMAIN}:${PORT}
+      VITE_BACKEND_URL: https://api.${MAIN_DOMAIN}
     depends_on:
       - backend
     networks:
