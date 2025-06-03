@@ -11,57 +11,39 @@ import favoriteRoutes from "./routes/favoriteRoutes.js";
 
 const app = express();
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    service: 'JoinUp Backend',
-    env: process.env.NODE_ENV,
-    database: process.env.MONGODB_URI?.split('/').pop()?.split('?')[0] || 'unknown'
-  });
-});
-
-// Configuración de CORS usando tus variables
+// Configuración de CORS para HTTPS
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'http://192.168.1.155:5173',
-  'http://192.168.1.155:3000',
-  // Tu dominio específico
-  `http://${process.env.MAIN_DOMAIN || 'joinup-project-joinupcompose-ncv5ku-dacd89-192-168-1-155.traefik.me'}`,
+  'https://localhost:5173',
+  'https://localhost:3000',
+  // Dominio con HTTPS
+  `https://${process.env.MAIN_DOMAIN}`,
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log('🌐 CORS Origin recibido:', origin);
-      console.log('🔧 Frontend URL configurada:', process.env.FRONTEND_URL);
-      console.log('🔧 Main Domain:', process.env.MAIN_DOMAIN);
-      
-      // Permitir requests sin origin
+      // Permitir requests sin origin (apps móviles, Postman, etc.)
       if (!origin) {
-        console.log('✅ CORS: Permitiendo request sin origin');
         return callback(null, true);
       }
       
       // Verificar origins permitidos
       const isAllowed = allowedOrigins.includes(origin);
       
-      // También verificar patrón traefik.me
-      const isTraefikDomain = /^http:\/\/.*\.traefik\.me$/.test(origin);
+      // También verificar patrón traefik.me con HTTPS
+      const isTraefikDomain = /^https:\/\/.*\.traefik\.me$/.test(origin);
       
       if (isAllowed || isTraefikDomain) {
-        console.log(`✅ CORS: Permitiendo origin: ${origin}`);
         callback(null, true);
       } else {
-        console.log(`❌ CORS: Bloqueando origin: ${origin}`);
-        console.log('📋 Origins permitidos:', allowedOrigins);
-        
-        // Permitir todo en desarrollo para debug
-        console.log('🔧 Permitiendo de todas formas para debug');
-        callback(null, true);
+        // Log solo para debug en desarrollo
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`CORS bloqueado para origen: ${origin}`);
+        }
+        callback(new Error('No permitido por CORS'));
       }
     },
     credentials: true,
@@ -79,14 +61,6 @@ app.use(
     optionsSuccessStatus: 200
   })
 );
-
-// Middleware para logging detallado
-app.use((req, res, next) => {
-  console.log(`🔄 ${req.method} ${req.path}`);
-  console.log(`📍 Origin: ${req.headers.origin || 'none'}`);
-  console.log(`🔗 Referer: ${req.headers.referer || 'none'}`);
-  next();
-});
 
 app.use(express.json());
 app.use(cookieParser());

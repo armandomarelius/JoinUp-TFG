@@ -32,10 +32,11 @@ services:
     networks:
       - dokploy-network
     labels:
-      # Traefik labels para Mongo Express en subdominio
+      # Traefik labels para Mongo Express en subdominio con HTTPS
       - "traefik.enable=true"
       - "traefik.http.routers.mongo-express.rule=Host(`mongo.${MAIN_DOMAIN}`)"
-      - "traefik.http.routers.mongo-express.entrypoints=web"
+      - "traefik.http.routers.mongo-express.entrypoints=websecure"
+      - "traefik.http.routers.mongo-express.tls.certresolver=letsencrypt"
       - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
 
   # Backend API
@@ -47,10 +48,10 @@ services:
     restart: unless-stopped
     environment:
       PORT: ${PORT}
-      NODE_ENV: development  # Cambiado a development para CORS permisivo
+      NODE_ENV: production
       MONGODB_URI: ${MONGODB_URI}
       JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_URL: https://${MAIN_DOMAIN}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
@@ -59,10 +60,11 @@ services:
     networks:
       - dokploy-network
     labels:
-      # Traefik labels para Backend API
+      # Traefik labels para Backend API con HTTPS
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`${MAIN_DOMAIN}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.routers.backend.priority=100"
       - "traefik.http.services.backend.loadbalancer.server.port=${PORT}"
       
@@ -78,16 +80,17 @@ services:
     container_name: joinup-frontend
     restart: unless-stopped
     environment:
-      VITE_BACKEND_URL: http://${MAIN_DOMAIN}
+      VITE_BACKEND_URL: https://${MAIN_DOMAIN}
     depends_on:
       - backend
     networks:
       - dokploy-network
     labels:
-      # Traefik labels para Frontend
+      # Traefik labels para Frontend con HTTPS
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=Host(`${MAIN_DOMAIN}`)"
-      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
       - "traefik.http.routers.frontend.priority=1"
       - "traefik.http.services.frontend.loadbalancer.server.port=5173"
       
