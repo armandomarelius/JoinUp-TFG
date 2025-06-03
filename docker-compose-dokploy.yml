@@ -43,7 +43,7 @@ services:
       dockerfile: Dockerfile
     container_name: joinup-backend
     ports:
-      - "3069:3000"
+      - "${PORT}:3000"
     
     restart: unless-stopped
     environment:
@@ -51,7 +51,7 @@ services:
       NODE_ENV: production
       MONGODB_URI: ${MONGODB_URI}
       JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: https://${MAIN_DOMAIN}
+      FRONTEND_URL: ${FRONTEND_URL}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
@@ -71,7 +71,7 @@ services:
       - "5173:5173"
     restart: unless-stopped
     environment:
-      VITE_BACKEND_URL: https://${MAIN_DOMAIN}
+      VITE_BACKEND_URL: https://${MAIN_DOMAIN}:${PORT}
     depends_on:
       - backend
     networks:
