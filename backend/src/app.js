@@ -19,6 +19,8 @@ const allowedOrigins = [
   'https://localhost:3000',
   'http://192.168.1.155:5173',
   'https://192.168.1.155:5173',
+  'http://192.168.1.155:3069',
+  'https://192.168.1.155:3069',
 
   // Dominio con HTTPS
   `https://${process.env.MAIN_DOMAIN}`,

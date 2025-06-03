@@ -15,6 +15,7 @@ COPY . .
 
 # Exponer el puerto en el que corre la aplicación
 EXPOSE 3000
+EXPOSE 3069
 
 # Comando para iniciar la aplicación
 CMD ["npm", "run", "dev"]
