@@ -45,6 +45,7 @@ services:
       NODE_ENV: production
       MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/joinup?authSource=admin
       JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
@@ -61,7 +62,7 @@ services:
     container_name: joinup-frontend
     restart: unless-stopped
     environment:
-      VITE_BACKEND_URL: http://192.168.1.155:3000
+      VITE_BACKEND_URL: http://joinup-project-joinupcompose-ncv5ku-dacd89-192-168-1-155.traefik.me
     depends_on:
       - backend
     networks:

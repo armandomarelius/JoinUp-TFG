@@ -11,13 +11,44 @@ import favoriteRoutes from "./routes/favoriteRoutes.js";
 
 const app = express();
 
-// Configuración de CORS - TEMPORAL: acepta todo para testing móvil
+// Configuración de CORS para Dokploy
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://192.168.1.155:5173',
+  'http://192.168.1.155:3000',
+  // Patrones para Dokploy/Traefik
+  /https?:\/\/.*\.traefik\.me$/,
+  /https?:\/\/joinup-project-.*\.traefik\.me$/,
+  // Tu dominio personalizado cuando lo tengas
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: true,  // Acepta cualquier origen pero devuelve el origen específico
+    origin: function (origin, callback) {
+      // Permitir requests sin origin (ej: aplicaciones móviles)
+      if (!origin) return callback(null, true);
+      
+      // Verificar si el origin está permitido
+      const isAllowed = allowedOrigins.some(allowedOrigin => {
+        if (typeof allowedOrigin === 'string') {
+          return allowedOrigin === origin;
+        }
+        // Si es regex
+        return allowedOrigin.test(origin);
+      });
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        console.log(`CORS bloqueado para origen: ${origin}`);
+        callback(new Error('No permitido por CORS'));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   })
 );
 
