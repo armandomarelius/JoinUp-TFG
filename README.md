@@ -49,7 +49,7 @@ JoinUp-TFG/
 
 #### **Frontend**
 - **React 19** con Vite 6
-- **Tailwind CSS 4** para estilos
+- **Tailwind CSS** para estilos
 - **React Router DOM 7** para enrutamiento
 - **Leaflet** para mapas interactivos
 - **Context API** para gestión de estado
