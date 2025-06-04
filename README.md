@@ -3,7 +3,7 @@
 
 ---
 
-## 4.1. Introducción a la Aplicación (Getting Started)
+## 1.1. Introducción a la Aplicación (Getting Started)
 
 ### 🌟 Descripción del Proyecto
 
@@ -76,7 +76,7 @@ JoinUp-TFG/
 
 ---
 
-## 4.2. Manual de Instalación
+## 1.2. Manual de Instalación
 
 ### 📋 Requisitos Previos
 
@@ -189,7 +189,7 @@ VITE_BACKEND_URL=http://localhost:3000
 
 ---
 
-## 4.3. Manual de Usuario
+## 1.3. Manual de Usuario
 
 ### 🚀 Primeros Pasos
 
@@ -273,7 +273,7 @@ VITE_BACKEND_URL=http://localhost:3000
 
 ---
 
-## 4.4. Manual de Administración
+## 1.4. Manual de Administración
 
 ### 🔐 Acceso de Administrador
 
@@ -298,8 +298,6 @@ Password: ñato'0'
 #### Moderación de Usuarios
 - **Suspender cuentas** de usuarios que violen las normas
 - **Reactivar cuentas** previamente suspendidas
-- **Gestionar reportes** enviados por otros usuarios
-- **Monitorear actividad sospechosa** o comportamientos inadecuados
 
 #### Efectos de la Suspensión
 - Usuario no puede iniciar sesión en la plataforma
@@ -322,7 +320,6 @@ Password: ñato'0'
 #### Moderación de Eventos
 - **Eliminar eventos** que violen las normas de la comunidad
 - **Gestionar eventos problemáticos** o inapropiados
-- 
 ---
 
 ## 📡 Endpoints Importantes de la API
@@ -383,9 +380,6 @@ Este proyecto está bajo la Licencia MIT.
 - Email: armandomarelius777@gmail.com
 
 ---
-
-### 🚀 ¡Comienza a conectar con tu comunidad local a través de eventos!
-
 
 
 
