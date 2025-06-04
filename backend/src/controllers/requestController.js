@@ -123,23 +123,41 @@ export const updateRequestStatus = async (req, res) => {
         const { requestId } = req.params; 
         const { status } = req.body; 
 
-        //verificar si la solicitud existe
-        const request = await EventRequest.findById(requestId).populate('event', "created_by participants");
+        // Verificar si la solicitud existe
+        const request = await EventRequest.findById(requestId).populate('event');
         if (!request) {
             return res.status(404).json({ message: "Solicitud no encontrada" });
         }
 
-        //verificar si el creador del evento es el usuario autenticado
+        // 🆕 VERIFICAR QUE EL EVENTO TODAVÍA EXISTE
+        if (!request.event) {
+            return res.status(404).json({ message: "El evento asociado ya no existe" });
+        }
+
+        // Verificar si el creador del evento es el usuario autenticado
         if (request.event.created_by.toString() !== req.userId) {
             return res.status(403).json({ message: "No tienes permisos para actualizar esta solicitud" });
         }
 
-        //actualizar el estado de la solicitud
+        //  VERIFICAR QUE EL EVENTO SIGUE ABIERTO
+        if (request.event.status !== "open") {
+            return res.status(400).json({ message: "El evento ya no está abierto para nuevas participaciones" });
+        }
+
+        // Actualizar el estado de la solicitud
         request.status = status;
         await request.save();
 
-        //si la solicitud es aceptada, añadir participante al evento
+        // Si la solicitud es aceptada, añadir participante al evento
         if (status === "accepted") {
+            //  VERIFICAR QUE EL EVENTO NO ESTÉ LLENO
+            if (request.event.max_participants && 
+                request.event.participants.length >= request.event.max_participants) {
+                return res.status(400).json({ 
+                    message: "El evento está lleno, no se pueden aceptar más participantes" 
+                });
+            }
+
             // Verificar que el usuario no esté ya en la lista de participantes
             if (!request.event.participants.includes(request.user)) {
                 request.event.participants.push(request.user);
@@ -147,8 +165,21 @@ export const updateRequestStatus = async (req, res) => {
             }
         }
 
+        // 🆕 SI SE RECHAZA, LIMPIAR CUALQUIER PARTICIPACIÓN DUPLICADA
+        if (status === "rejected") {
+            // Por si acaso hay inconsistencias, quitar al usuario de participantes
+            const event = await Event.findById(request.event._id);
+            if (event.participants.includes(request.user)) {
+                event.participants = event.participants.filter(
+                    participant => participant.toString() !== request.user.toString()
+                );
+                await event.save();
+            }
+        }
+
         res.status(200).json({ message: "Solicitud actualizada exitosamente" });  
     } catch (error) {
+        console.error('Error al actualizar solicitud:', error);
         res.status(500).json({ message: "Error al actualizar la solicitud" });
     }
 }

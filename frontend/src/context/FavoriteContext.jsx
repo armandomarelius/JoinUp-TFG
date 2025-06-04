@@ -24,7 +24,9 @@ export const FavoriteProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       const data = await getUserFavorites();
-      setFavorites(data);
+      // Filtrar favoritos con eventos null
+      const validFavorites = data.filter(fav => fav.event !== null);
+      setFavorites(validFavorites);
     } catch (err) {
       setError(err.message);
       console.error('Error al cargar favoritos:', err);
@@ -50,8 +52,8 @@ export const FavoriteProvider = ({ children }) => {
     try {
       setError(null);
       await removeFromFavorites(eventId);
-      // Quitar el favorito del estado local
-      setFavorites(favorites.filter(fav => fav.event._id !== eventId));
+      // Quitar el favorito del estado local - con validación
+      setFavorites(favorites.filter(fav => fav.event && fav.event._id !== eventId));
       return { success: true, message: 'Evento eliminado de favoritos' };
     } catch (err) {
       setError(err.message);
@@ -69,7 +71,7 @@ export const FavoriteProvider = ({ children }) => {
 
   // Función simple para verificar si un evento es favorito
   const isFavorite = (eventId) => {
-    return favorites.some(fav => fav.event._id === eventId);
+    return favorites.some(fav => fav.event && fav.event._id === eventId);
   };
 
   const value = {

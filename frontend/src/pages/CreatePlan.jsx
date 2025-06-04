@@ -35,6 +35,24 @@ const CreatePlan = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+    if (name === 'title' && value.length > 100) {
+      setError('El título no puede superar los 100 caracteres');
+      return;
+    }
+    
+    if (name === 'description' && value.length > 500) {
+      setError('La descripción no puede superar los 500 caracteres');
+      return;
+    }
+    
+    if (name === 'max_participants') {
+      const num = parseInt(value);
+      if (num < 1 || num > 1000) {
+        setError('El máximo de participantes debe estar entre 1 y 1000');
+        return;
+      }
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: files ? files[0] : value

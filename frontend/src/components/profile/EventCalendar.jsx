@@ -17,6 +17,7 @@ const EventCalendar = () => {
     const currentTime = new Date();
     
     const participating = participatingEvents?.filter(event => {
+      if (!event || !event.date) return false;
       const eventDate = new Date(event.date);
       return eventDate.getFullYear() === year && 
              eventDate.getMonth() === month &&
@@ -24,6 +25,7 @@ const EventCalendar = () => {
     }) || [];
     
     const created = myEvents?.filter(event => {
+      if (!event || !event.date) return false;
       const eventDate = new Date(event.date);
       return eventDate.getFullYear() === year && 
              eventDate.getMonth() === month &&
@@ -31,6 +33,7 @@ const EventCalendar = () => {
     }) || [];
 
     const favoriteEvents = favorites?.filter(favorite => {
+      if (!favorite || !favorite.event || !favorite.event.date) return false;
       const eventDate = new Date(favorite.event.date);
       return eventDate.getFullYear() === year && 
              eventDate.getMonth() === month &&

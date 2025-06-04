@@ -40,9 +40,12 @@ const FavoritesSection = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {favorites.map((favorite) => (
-            <EventCard key={favorite._id} event={favorite.event} />
-          ))}
+          {favorites
+            .filter(favorite => favorite.event !== null)
+            .map((favorite) => (
+              <EventCard key={favorite._id} event={favorite.event} />
+            ))
+          }
         </div>
       )}
     </div>

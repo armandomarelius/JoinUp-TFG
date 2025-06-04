@@ -3,6 +3,7 @@ import { cloudinary } from '../config/cloudinary.js';
 import { geocodeAddress } from '../services/geocodingService.js';
 import EventRequest from "../models/EventRequest.js";
 import { updateExpiredEvents } from '../services/eventService.js';
+import Favorite from "../models/Favorite.js";
 
 export const getAllEvents = async (req, res) => {
     try {
@@ -117,6 +118,16 @@ export const updateEvent = async (req, res) => {
             }
         }
 
+        // max_participants vs participantes actuales
+        if (event.participation_type === "participative" && max_participants) {
+            const currentParticipants = event.participants.length;
+            if (max_participants < currentParticipants) {
+                return res.status(400).json({ 
+                    message: `No puedes reducir el límite a ${max_participants} participantes. Actualmente hay ${currentParticipants} participantes. Elimina participantes primero.` 
+                });
+            }
+        }
+
         let image = event.image;
         if (req.file) {
             // Si hay una imagen anterior, la eliminamos de Cloudinary
@@ -154,6 +165,7 @@ export const updateEvent = async (req, res) => {
         res.json({ message: "Evento actualizado exitosamente", event: updatedEvent });
 
     } catch(error) {
+        console.error('Error al actualizar evento:', error);
         res.status(500).json({ message: "Error al actualizar el evento" });
     }
 }
@@ -196,10 +208,19 @@ export const deleteEventById = async (req, res) => {
             await cloudinary.uploader.destroy(event.image.public_id);
         }
 
+        // ELIMINACIÓN EN CASCADA
+        // 1. Eliminar todos los favoritos que referencian este evento
+        await Favorite.deleteMany({ event: id });
+        
+        // 2. Eliminar todas las solicitudes para este evento
+        await EventRequest.deleteMany({ event: id });
+        
+        // 3. Finalmente eliminar el evento
         await Event.findByIdAndDelete(id);
 
         res.json({ message: "Evento eliminado exitosamente" });
     } catch (error) {
+        console.error('Error al eliminar el evento:', error);
         res.status(500).json({ message: "Error al eliminar el evento" });
     }
 }
